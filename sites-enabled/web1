@@ -1,0 +1,84 @@
+
+server {
+	listen 80;  #Lắng nghe ở IPV4 port 80 của máy;
+	#port này khi truy cập trên trình duyệt thông qua host đã set trong file etc\host thì phải kèm theo port nếu dùng port khác 80;
+	#ví dụ : site của chúng ta có tên "web2" port là 8080 khi set vào hosts sẽ là "127.0.0.1 web2" và khi truy cập phải là "web2:8080"
+	#đa số sẽ dùng port 80 để khỏi phải có cái port phía sau khi truy cập.
+	#Nếu vẫn muốn chạy ở port khác 80 mà truy cập không có :port ở phía sau thì dùng proxy_pass ở virtual host 80 để proxy ngược đến port 8080.
+
+	listen [::]:80; #Lắng nghe ở IPV6 port 80 của máy;
+
+	root /var/www/html/web1; #Thư mục gốc mà virtual host này sẽ làm việc;
+
+	index index.html; # file mặc định được trả về nếu không có file được yêu cầu trong request, #có thể liệt kê nhiều file ở đây, nginx sẽ lấy file tiếp theo nếu file trước không tồn tại;
+
+	#server_name web1.com; #này sẽ là host name khi add vào file etc\hosts "127.0.0.1 web1.com"
+
+	#location / {
+	#	try_files $uri $uri/ =404;
+	#}
+
+	# add header này để thêm vào header của response để không chị cors ở trình duyệt
+	#add_header "Access-Control-Allow-Origin"  * always;
+    #add_header "Access-Control-Allow-Headers" "*" always;
+    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD" always;
+
+    #error_page 404 /index.php; #sẽ return lại page index nếu gặp lỗi
+    #charset utf-8; #cho phép response utf-8try
+
+    #nginx sẽ tìm kiếm location giống nhất để thực thi lệnh bên trong.
+    # "~" tìm kiếm phân biệt hoa thường, các ký tự đứng sau ~ đều phân biệt hoa thường ví dụ ( /test.html sẽ có status là 1)
+        #location ~/test.html {
+        #   return 1;
+        #}
+        #location ~/Test.html {
+        #   return 2;
+        #}
+
+
+    # "~*" tìm kiếm không phân biệt hoa thường, các ký tự đứng sau ~ khong phân biệt hoa thường ví dụ. ( /test.html, /Test.html cùng trả lại là 1)
+        #location ~*/test.html {
+        #   return 1;
+        #}
+        #location ~*/Test.html {
+        #   return 2;
+        #}
+
+    # "^/path(/|/path)$ tìm kiếm theo /Blog/ hoặc /Blog/index.php (sử dụng phép toán trong dấu ngoặc)"
+        #location ^/Blog(/|/index\.php)${
+        #   return 1;
+        #}
+
+    # "^~ /blog/test.html/" nó sẽ dừng lại nếu khớp vs 1 uri cụ thể maf không nhảy sang "~" (các biểu thức chính quy bao gồm so so sánh phân biệt và không phân biệt hoa thường).
+    #Ví dụ: /blog/test.com thì sẽ nhận được là 1.
+        #location ^~ /blog{
+        #   return 1;
+        #}
+        #location ~/blog{
+        #   return 2;
+        #}
+
+    #cách nginx so sánh uri
+    # 1 - Đầu tiên nginx sẽ so sánh các uri hoàn chỉnh (là các uri giống location 1 , không bắt đầu: ^~, ~, ~*) nếu có location khớp hoan toan và trước uri có dấu "=" thì các câu lệnh trong đó sẽ được thực thi.
+    #   ngược lại không có dấu = thì location đó được lưu tạm thời.
+    # 2 - kiểm tra các location bắt đầu là "^~" nếu nó có uri giong hoan toan thì sẽ thực thi các câu lệnh bên trong, nếu không sẽ tới bước 3.
+    # 3 - kiểm tra các location bắt đầu là "~, ~*" theo thứ tự "~" và "~*" cái nào giống trước thì được chọn, nếu không sẽ tới bước 4.
+    # 4 - sẽ lấy location được lưu ở bước 1 để chạy.
+    #Note: nếu đặt uri hoành chỉnh và uri bắt đầu là ^~ giống nhau sẽ bị lỗi trùng.
+    #Ví dụ:
+        location /blogs{
+           return 1;
+        }
+        location =/blogs{
+           return 2;
+        }
+        location ^~ /blog{
+           return 3;
+        }
+        location ~/blog{
+           return 4;
+        }
+        location ~* /blog{
+           return 5;
+        }
+}

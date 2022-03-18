@@ -1,0 +1,16 @@
+
+server {
+	listen 8080;
+	listen [::]:8080;
+
+	root /var/www/html/web2;
+
+	index index.html;
+
+	server_name web2.com;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}
+

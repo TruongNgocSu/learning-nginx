@@ -1,0 +1,16 @@
+server {
+    listen              443 ssl;
+    server_name         example.com;
+
+    #openssl genrsa -out {ten_file}.key {do_dai_key} -> để tạo ra private key
+    #openssl req -x509 -new -nodes -key {ten_file.key} -sha256 -days 1825 -out {ten_file.pem} -> để tạo ra public key
+    ssl_certificate     cert.pem; #path public key
+    ssl_certificate_key cert.key; #path private key
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+     location / {
+            root   /var/www/html/web1;
+            index  index.html;
+        }
+}

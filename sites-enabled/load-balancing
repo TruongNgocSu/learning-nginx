@@ -1,0 +1,29 @@
+
+
+    upstream backend_servers {
+        # mặc định thì nginx sẽ dùng thuật toán "Round robin" để chuyển lần lượt request đến server.
+        # thuật toán "Least connected" tính toán lượng request mỗi server đang xử lý và sẽ điều hướng request đến server có ít request hơn;
+            #least_conn;
+        #thuật toán hash
+        #thuật toán ip_hashhash sẽ đảm bảo rằng request từ 1 IP sẽ chỉ đến 1 server
+            #ip_hash;
+        #thuật toán Least Time chỉ dùng được ở bản trả nginx plus.
+
+        server localhost:3000;
+        server localhost:3001;
+        server localhost:3002;
+    }
+
+    server {
+        listen 80;
+        server_name web1.com;
+
+        location / {
+            proxy_pass http://backend_servers;
+        }
+    }
+
+    #note:
+    #https://viblo.asia/p/nginx-loadbalancing-part-1-yMnKMmLmK7P
+    #https://viblo.asia/p/load-balancing-voi-nginx-bWrZnVxnZxw
+    #https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer
